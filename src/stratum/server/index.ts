@@ -10,6 +10,7 @@ import { getSocketLogData } from '../utils';
 export type Worker = {
   address: string;
   name: string;
+  canxiumAddr: string;
 };
 
 export type Miner = {

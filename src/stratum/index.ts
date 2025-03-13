@@ -225,6 +225,24 @@ export default class Stratum extends EventEmitter {
     return finalDiff;
   }
 
+  private processCanxiumAddress(address: string): string {
+    // Remove "0x" prefix if present
+    if (address.startsWith('0x')) {
+      address = address.slice(2);
+    } else if (address.toLowerCase().startsWith('canxiuminer:0x')) {
+      // If it has both prefixes, remove the "0x" part
+      const prefix = 'canxiuminer:';
+      address = prefix + address.slice(prefix.length + 2);
+    }
+
+    // Ensure the address has the "canxiuminer:" prefix
+    if (!address.toLowerCase().startsWith('canxiuminer:')) {
+      address = 'canxiuminer:' + address;
+    }
+
+    return address;
+  }
+
   private async onMessage(socket: Socket<Miner>, request: Request) {
     const release = await this.minerDataLock.acquire();
     try {
@@ -268,6 +286,7 @@ export default class Stratum extends EventEmitter {
         case 'mining.authorize': {
           const [address, name] = request.params[0].split('.');
           let varDiffStatus = false;
+          const [address, name, canxiumAddr] = request.params[0].split('.');
           let userDiff = this.difficulty; // Defaults to the ports default difficulty
           const userDiffInput = request.params[1];
           if (this.port === 8888 && (userDiffInput != '' || /\d/.test(userDiffInput))) {
@@ -289,8 +308,11 @@ export default class Stratum extends EventEmitter {
               `Invalid address, parsed address: ${address}, request: ${request.params[0]}`
             );
           if (!name) throw Error(`Worker name is not set. Request: ${request.params[0]}`);
+          if (!canxiumAddr) this.monitoring.log(`Canxium address is not set.`);
 
-          const worker: Worker = { address, name: name };
+          const processedCanxiumAddress = this.processCanxiumAddress(canxiumAddr);
+
+          const worker: Worker = { address, name, canxiumAddr };
           if (socket.data.workers.has(worker.name)) {
             logger.warn('miner-duplicate-worker', getSocketLogData(socket, { address, name }));
             throw Error(`Worker with duplicate name: ${name} for address: ${address}.`);
@@ -358,7 +380,7 @@ export default class Stratum extends EventEmitter {
 
           if (DEBUG)
             this.monitoring.debug(
-              `Stratum ${this.port}: Authorizing worker - Address: ${address}, Worker Name: ${name}`
+              `Stratum ${this.port}: Authorizing worker - Address: ${address}, Worker Name: ${name}, Canxium address: ${processedCanxiumAddress}`
             );
 
           logger.info('miner-authorize', getSocketLogData(socket, { address, name }));
