@@ -105,7 +105,6 @@ export class StratumHandler {
     }
 
     const worker: Worker = { address, name, canxiumAddr };
-
     if (socket.data.workers.has(worker.name)) {
       logger.warn('miner-duplicate-worker', getSocketLogData(socket, { address, name }));
       throw Error(`Worker with duplicate name: ${name} for address: ${address}.`);

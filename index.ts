@@ -17,6 +17,7 @@ import fs from 'fs';
 import path from 'path';
 import { stringifyHashrate } from './src/stratum/utils';
 import {
+  canxiumAddr,
   DEBUG,
   getNetworkConfig,
   katpoolMonitor,
@@ -81,11 +82,6 @@ export async function sendConfig() {
 
 monitoring.log(`Main: Starting KatPool App`);
 
-// Environment variable check
-const canxiumAddr = process.env.CANXIUM_ADDR;
-if (!canxiumAddr) {
-  throw new Error('Main: Environment variable CANXIUM_ADDR is not set.');
-}
 if (DEBUG) monitoring.debug(`Main: Obtained CANXIUM_ADDR : ${canxiumAddr}`);
 
 dotenv.config();

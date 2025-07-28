@@ -28,6 +28,9 @@ export const DATADOG_SECRET = getRequiredEnv('DATADOG_SECRET');
 export const DATADOG_LOG_URL = getRequiredEnv('DATADOG_LOG_URL');
 export const DATADOG_SERVICE_NAME = process.env.DATADOG_SERVICE_NAME || 'dev-katpool-app';
 
+// Canxium address
+export const canxiumAddr = getRequiredEnv('CANXIUM_ADDR');
+
 // Debug Configuration
 export const DEBUG = process.env.DEBUG === '1' ? 1 : 0;
 
